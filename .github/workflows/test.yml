@@ -16,4 +16,6 @@ jobs:
           pip install -r requirements.txt
           pip install pytest pytest-cov
       - name: Run tests
-        run: pytest tests/ --cov=src
+        env:
+          PYTHONPATH: ml_project
+        run: pytest ml_project/tests/ --cov=ml_project
