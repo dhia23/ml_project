@@ -14,9 +14,20 @@ jobs:
           python-version: '3.11'
       
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Verify project structure
+        run: |
+          echo "=== Project Structure ==="
+          ls -la
+          echo "=== Checking for __init__.py files ==="
+          find . -name "__init__.py"
+          echo "=== Checking pytest.ini ==="
+          cat pytest.ini || echo "pytest.ini not found!"
       
       - name: Run tests
-        run: pytest tests/ --cov=.
-        env:
-          PYTHONPATH: .
+        run: |
+          export PYTHONPATH="${PYTHONPATH}:$(pwd)"
+          pytest tests/ --cov=. -v
