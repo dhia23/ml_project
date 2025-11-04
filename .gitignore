@@ -57,7 +57,6 @@ mlflow.db
 *.parquet
 *.feather
 *.json
-data/
 datasets/
 
 # Logs
