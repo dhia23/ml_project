@@ -1,4 +1,4 @@
-from data.load_data import load_data
+from data.loadData import load_data
 from preprocessing.preprocess import preprocess_data
 from model.model import create_model, build_pipeline, train_and_evaluate
 

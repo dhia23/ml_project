@@ -1,0 +1,11 @@
+- name: Train model
+  run: python src/train.py
+
+- name: Validate model
+  run: python src/validate_model.py
+
+- name: Upload model artifact
+  uses: actions/upload-artifact@v3
+  with:
+    name: trained-model
+    path: full_pipeline.pkl

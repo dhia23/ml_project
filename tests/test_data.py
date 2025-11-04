@@ -1,4 +1,4 @@
-from data.load_data import load_data
+from data.loadData import load_data
 def test_load_data():
     df = load_data()
     assert not df.empty, "DataFrame is empty"
