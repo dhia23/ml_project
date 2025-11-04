@@ -17,5 +17,5 @@ jobs:
           pip install pytest pytest-cov
       - name: Run tests
         env:
-          PYTHONPATH: ml_project
-        run: pytest ml_project/tests/ --cov=ml_project
+          PYTHONPATH: .
+        run: pytest tests/ --cov=.
