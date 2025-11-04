@@ -1,6 +1,5 @@
 from data.loadData import load_data
 from preprocessing.preprocess import preprocess_data
-from model.model import create_model, build_pipeline, train_and_evaluate
 
 def test_preprocess_data():
     df = load_data()
