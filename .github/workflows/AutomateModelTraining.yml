@@ -1,3 +1,25 @@
+name: Automated Model Training
+
+on:
+  # Manual trigger for on-demand training
+  workflow_dispatch:
+  
+  # Automatic trigger when training code or data changes
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/train.py'
+      - 'src/validate_model.py'
+      - 'model/**'
+      - 'data/**'
+      - 'preprocessing/**'
+      - 'requirements.txt'
+  
+  # Scheduled retraining (e.g., weekly with fresh data)
+  schedule:
+    - cron: '0 2 * * 1'  # Every Monday at 2 AM UTC
+
 jobs:
   train-model:
     runs-on: ubuntu-latest
@@ -8,6 +30,14 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
       - name: Install dependencies
         run: pip install -r requirements.txt
@@ -22,8 +52,21 @@ jobs:
           export PYTHONPATH="${PYTHONPATH}:$(pwd)"
           python src/validate_model.py
 
+      - name: Check model file exists
+        run: |
+          if [ ! -f "full_pipeline.pkl" ]; then
+            echo "❌ Model file not created"
+            exit 1
+          fi
+          echo "✅ Model file size: $(du -h full_pipeline.pkl | cut -f1)"
+
       - name: Upload model artifact
         uses: actions/upload-artifact@v3
         with:
-          name: trained-model
+          name: trained-model-${{ github.run_number }}
           path: full_pipeline.pkl
+          retention-days: 30
+
+      - name: Notify on failure
+        if: failure()
+        run: echo "::error::Training pipeline failed!"
