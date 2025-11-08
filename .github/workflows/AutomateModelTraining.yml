@@ -1,4 +1,4 @@
-name: Automated Model Training
+name: Automated Model Training and Usage
 
 on:
   workflow_dispatch:
@@ -12,16 +12,16 @@ on:
       - 'preprocessing/**'
       - 'requirements.txt'
   schedule:
-    - cron: '0 2 * * 1'
+    - cron: '0 2 * * 1'  # Every Monday at 2 AM
 
 jobs:
   train-model:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4  # Also updated to v4
+      - uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v5  # Also updated to v5
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
@@ -39,7 +39,38 @@ jobs:
           python src/validate_model.py
 
       - name: Upload model artifact
-        uses: actions/upload-artifact@v4  # ✅ Updated to v4
+        uses: actions/upload-artifact@v4
         with:
           name: trained-model
           path: full_pipeline.pkl
+          retention-days: 30  # Keep artifact for 30 days
+
+  load-and-use-model:
+    runs-on: ubuntu-latest
+    needs: train-model  # ✅ This job waits for train-model to complete
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Download model artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: trained-model
+          path: store  # Downloads to ./store/full_pipeline.pkl
+
+      - name: Load and use model
+        run: |
+          export PYTHONPATH="${PYTHONPATH}:$(pwd)"
+          python main.py
+
+      - name: Display model info (optional)
+        run: |
+          echo "Model successfully loaded and used!"
+          ls -lh store/
